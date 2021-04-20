@@ -5,14 +5,15 @@ import sys
 import requests
 from telegram.ext import Updater, MessageHandler, Filters
 from telegram.ext import CallbackContext, CommandHandler
+from telegram import User
 
 from Country_class import Country
 
 TOKEN = '1772095252:AAGf3sq-39Uvu2XzAscP-qDuHP2J31fQREE'
 country_outline = False
-pasta = 'рофл'
-attemps = 100
-outline = Country(random.randrange(1, 46), attemps)
+pasta = '*паста*'
+attemps = 10
+outline = Country(random.randrange(1, 41), attemps)
 
 
 # Определяем функцию-обработчик сообщений.
@@ -32,7 +33,7 @@ def reply(update, context):
             country_outline = False
             rep_list = ['Верно!', 'Это правильный ответ!', 'Правильно!']
             update.message.reply_text(rep_list[random.randrange(len(rep_list))])
-            update.message.reply_text(f'Вам понадобилось {attemps - outline.attemps} попыток!')
+            update.message.reply_text(f'Вам понадобилось {attemps - outline.attemps} попыток!')   # TODO
             return
         else:
             outline.attemps -= 1
@@ -49,7 +50,7 @@ def reply(update, context):
                             'Думай шире, я загадал более южную страну.']
         if outline.attemps > 0:
             update.message.reply_text(rep_list[random.randrange(len(rep_list))])
-            update.message.reply_text(f'У Вас осталось {outline.attemps} попыток!')
+            update.message.reply_text(f'У Вас осталось {outline.attemps} попыток!')   # TODO
     else:
         update.message.reply_text('Извините, я не знаю такой команды.')
         update.message.reply_text(pasta)
@@ -64,9 +65,11 @@ def start_country_outline(update, context):
     global outline, country_outline
     update.message.reply_text("Начинаем игру!")
 
-    outline = Country(random.randrange(1, 2), attemps)
+    outline = Country(random.randrange(1, 11), attemps)
+    update.message.reply_text(f"У Вас {attemps} {'попыток'}")  # TODO
     update.message.reply_text("Вот очертания загаданной страны:")
-    update.bot.send_photo(chat_id='@GuessPlace_bot', photo=open(outline.path, 'rb'))
+    id = update.message.chat_id
+    context.bot.send_photo(chat_id=id, photo=open(outline.path[0], 'rb'))
     country_outline = True
 
 
@@ -96,8 +99,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-# http://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode=Красная пл-дь, 1&format=json
-# https://static-maps.yandex.ru/1.x/?ll=16.106443,45.439828&spn=0.9,0.9&l=map&lang=ht_TR
-# 0 - 179.999
-# - 83
-# https://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode=hbsd&format=json
