@@ -11,25 +11,31 @@ pasta = f'''Чтобы начать игру "Угадай страну по е�
 Чтобы начать игру "Угадай страну по сувениру", нажмите {'/souvenirs'}
 Чтобы начать игру "Угадай страну по фотографии", нажмите {'/photo'}
 Чтобы получить более подробную информацию, нажмите {'/help'}'''
+
+# Изначально никакая игра не запущена
 country_outline = False
 country_souvenir = False
 country_photo = False
+# Кол-во попыток - 10
 attemps = 10
-outline = CountryOutline(attemps)
-souvenir = CountrySouvenir()
-photo = CountryPhoto(attemps)
 
 
+# Функция для сопоставления слова с числительным
 def matching(word, num):
     morph = pymorphy2.MorphAnalyzer()
     comment = morph.parse(word)[0]
     return comment.make_agree_with_number(num).word
 
 
+# Функция - обработчик сообщений пользователя
 def reply(update, context):
     global country_outline, attemps, outline, pasta, country_souvenir, country_photo, photo
     text = update.message.text
+    # Если идет игра с очертанием...
     if country_outline:
+        # Получаем exit_code и на его основе отвечаем пользователю.
+        # Возможно, завершаем игру в случае, если пользователь угадал страну
+        # или если кол-во попыток закончилось
         exit_code = outline.right_country(text)
         rep_list = []
         if exit_code == 0:
@@ -68,6 +74,7 @@ def reply(update, context):
             update.message.reply_text(['Вы проиграли!', 'К сожалению, Вы проиграли.'][random.randrange(2)])
             update.message.reply_text(f'Это {outline.name}! Вы были близки!')
             update.message.reply_text(pasta)
+    # Если идет игра с сувениром...
     elif country_souvenir:
         exit_code = souvenir.right_country(text)
 
@@ -90,6 +97,7 @@ def reply(update, context):
             update.message.reply_text(rep_list[random.randrange(len(rep_list))])
             update.message.reply_text(f'Правильный ответ: {souvenir.name}')
             update.message.reply_text(pasta)
+    # Если идет игра с фото...
     elif country_photo:
         exit_code = photo.right_country(text)
         rep_list = []
@@ -129,6 +137,7 @@ def reply(update, context):
             update.message.reply_text(['Вы проиграли!', 'К сожалению, Вы проиграли.'][random.randrange(2)])
             update.message.reply_text(f'Это {photo.name}! Вы были близки!')
             update.message.reply_text(pasta)
+    # Если никакая игра не запущена, обрабатываем некоторые слова пользователя
     else:
         if 'привет' in text.lower() or 'здравствуйте' in text.lower():
             update.message.reply_text('Привет.')
@@ -147,6 +156,7 @@ def reply(update, context):
             update.message.reply_text(pasta)
 
 
+# Функция для начала игры с очертанием
 def start_country_outline(update, context):
     global outline, country_outline
     outline = CountryOutline(attemps)
@@ -159,6 +169,7 @@ def start_country_outline(update, context):
     country_outline = True
 
 
+# Функция для начала игры с сувениром
 def start_country_souvenirs(update, context):
     global country_souvenir, souvenir
     souvenir = CountrySouvenir()
@@ -171,6 +182,7 @@ def start_country_souvenirs(update, context):
     country_souvenir = True
 
 
+# Функция для начала игры с фото
 def start_country_photo(update, context):
     global photo, country_photo
     photo = CountryPhoto(attemps)
@@ -183,6 +195,7 @@ def start_country_photo(update, context):
     country_photo = True
 
 
+# Функция - помощник
 def help(update, context):
     global attemps
     update.message.reply_text(f"""У меня есть 3 игры:
@@ -204,6 +217,7 @@ def help(update, context):
     Чтобы поиграть в эту игру, нажмите /photo""")
 
 
+# Главная функция
 def main():
 
     updater = Updater(TOKEN, use_context=True)
